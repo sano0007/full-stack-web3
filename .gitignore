@@ -145,3 +145,5 @@ node_modules
 /coverage.json
 
 .idea
+
+hardhat.config.js
