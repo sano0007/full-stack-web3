@@ -80,4 +80,14 @@ describe('Escrow', () => {
             expect(purchasePrice).to.be.equal(tokens(10));
         });
     })
+
+    describe('Deposits', async () => {
+        it('Updates contract balance', async () => {
+            const transaction = await escrow.connect(buyer).depositEarnest(0, {value: tokens(5)});
+            await transaction.wait();
+
+            const escrowBalance = await escrow.getBalance();
+            expect(escrowBalance).to.be.equal(tokens(5));
+        });
+    })
 });
