@@ -90,4 +90,62 @@ describe('Escrow', () => {
             expect(escrowBalance).to.be.equal(tokens(5));
         });
     })
+
+    describe('Inspection', async () => {
+        it('Updates inspection status', async () => {
+            const transaction = await escrow.connect(inspector).updateInspectionStatus(0, true);
+            await transaction.wait();
+
+            const isInspectionPassed = await escrow.inspectionPassed(0);
+            expect(isInspectionPassed).to.be.true;
+        });
+    })
+
+    describe('Approval', async () => {
+        it('Updates approval status', async () => {
+            let transaction = await escrow.connect(buyer).approveSale(0);
+            await transaction.wait();
+
+            transaction = await escrow.connect(seller).approveSale(0);
+            await transaction.wait();
+
+            transaction = await escrow.connect(lender).approveSale(0);
+            await transaction.wait();
+
+            expect(await escrow.approval(0, await buyer.getAddress())).to.be.true;
+            expect(await escrow.approval(0, await seller.getAddress())).to.be.true;
+            expect(await escrow.approval(0, await lender.getAddress())).to.be.true;
+        });
+    })
+
+    describe('Sale', async () => {
+        beforeEach(async () => {
+            let transaction = await escrow.connect(buyer).depositEarnest(0, {value: tokens(5)});
+            await transaction.wait();
+
+            transaction = await escrow.connect(inspector).updateInspectionStatus(0, true);
+            await transaction.wait();
+
+            transaction = await escrow.connect(buyer).approveSale(0);
+            await transaction.wait();
+
+            transaction = await escrow.connect(seller).approveSale(0);
+            await transaction.wait();
+
+            transaction = await escrow.connect(lender).approveSale(0);
+            await transaction.wait();
+
+            await lender.sendTransaction({to: await escrow.getAddress(), value: tokens(5)});
+
+            transaction = await escrow.connect(seller).finalizeSale(0);
+            await transaction.wait();
+        })
+
+        it("Updates ownership", async () => {
+            expect(await realEstate.ownerOf(0)).to.be.equal(await buyer.getAddress());
+        });
+        it("Updates balance", async () => {
+            expect(await escrow.getBalance()).to.be.equal(0);
+        });
+    });
 });
