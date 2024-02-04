@@ -30,6 +30,14 @@ describe('Escrow', () => {
             await inspector.getAddress(),
             await lender.getAddress()
         );
+
+        //Approve property
+        transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), 0);
+        await transaction.wait();
+
+        // List property
+        transaction = await escrow.connect(seller).list(0, tokens(10), tokens(5), await buyer.getAddress());
+        await transaction.wait();
     })
 
     describe('Deployment', async () => {
@@ -48,6 +56,28 @@ describe('Escrow', () => {
         it('Returns lender', async () => {
             const lenderAddress = await escrow.lender();
             expect(lenderAddress).to.be.equal(await lender.getAddress());
+        });
+    })
+
+    describe('Listing', async () => {
+        it('Updates as listed', async () => {
+            const isListed = await escrow.isListed(0);
+            expect(isListed).to.be.true;
+        });
+        it('Updates ownership', async () => {
+            expect(await realEstate.ownerOf(0)).to.be.equal(await escrow.getAddress());
+        });
+        it('Returns buyer', async () => {
+            const buyerAddress = await escrow.buyer(0);
+            expect(buyerAddress).to.be.equal(await buyer.getAddress());
+        });
+        it('Returns escrow amount', async () => {
+            const escrowAmount = await escrow.escrowAmount(0);
+            expect(escrowAmount).to.be.equal(tokens(5));
+        });
+        it('Returns purchase price', async () => {
+            const purchasePrice = await escrow.purchasePrice(0);
+            expect(purchasePrice).to.be.equal(tokens(10));
         });
     })
 });
