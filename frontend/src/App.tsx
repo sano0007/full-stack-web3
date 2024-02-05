@@ -5,9 +5,11 @@ import {Navigation} from "./components/Navigation.tsx";
 import {Search} from "./components/Search.tsx";
 
 import RealEstate from './abis/RealEstate.json';
+import Escrow from './abis/Escrow.json';
 import config from './config.json';
 import {Config} from "./interfaces/config-types.ts";
 import {RealEstateItem} from "./interfaces/real-estate-item.ts";
+import {Home} from "./components/Home.tsx";
 
 function App() {
     const [provider, setProvider] = useState<ethers.BrowserProvider>();
@@ -15,6 +17,8 @@ function App() {
 
     const [account, setAccount] = useState<string>('');
     const [homes, setHomes] = useState<RealEstateItem[]>();
+    const [home, setHome] = useState<RealEstateItem>();
+    const [toggle, setToggle] = useState<boolean>(false);
     const loadBLockChain = async () => {
 
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -36,7 +40,7 @@ function App() {
 
         setHomes(homes);
 
-        const escrow = new ethers.Contract((config as Config)[String(network.chainId)].escrow.address, RealEstate, provider);
+        const escrow = new ethers.Contract((config as Config)[String(network.chainId)].escrow.address, Escrow, provider);
         setEscrow(escrow);
 
         window.ethereum.on('accountsChanged', async () => {
@@ -50,6 +54,11 @@ function App() {
         loadBLockChain().then();
     }, [])
 
+    const toggleProp = (home: RealEstateItem) => {
+        setHome(home);
+        toggle ? setToggle(false) : setToggle(true);
+    }
+
     return (
         <div>
             <Navigation account={account} setAccount={setAccount}/>
@@ -62,8 +71,8 @@ function App() {
                 <div className={'cards'}>
                     {homes?.map((home, index) => {
                         return (
-                            <div className={'card'} key={index}>
-                                <div className={'card__image'}>
+                            <div className={'card'} key={index} onClick={() => toggleProp(home)}>
+                                <div className={'card__image'} key={index}>
                                     <img src={home.image} alt={"Home"}/>
                                 </div>
                                 <div className={'card__info'}>
@@ -79,8 +88,11 @@ function App() {
                         )
                     })}
                 </div>
-
             </div>
+
+            {toggle && home && escrow && provider && (
+                <Home home={home} escrow={escrow} account={account} provider={provider} toggleProp={toggleProp}/>
+            )}
 
         </div>
     );
