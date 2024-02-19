@@ -1,4 +1,3 @@
-import './App.css'
 import {ethers} from "ethers";
 import {useEffect, useState} from "react";
 import {Navigation} from "./components/Navigation.tsx";
@@ -29,7 +28,7 @@ function App() {
 
         const realEstate = new ethers.Contract((config as Config)[String(network.chainId)].realEstate.address, RealEstate, provider);
         const totalSupply = await realEstate.totalSupply();
-        const homes = []
+        const homes: RealEstateItem[] = []
 
         for (let i = 1; i <= totalSupply; i++) {
             const uri = await realEstate.tokenURI(i - 1);

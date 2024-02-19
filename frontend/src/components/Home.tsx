@@ -27,7 +27,7 @@ export function Home({home, escrow, provider, account, toggleProp}: HomeProps) {
     const fetchDetails = async () => {
 
         // buyer
-        const buyer = await escrow.getBuyerAddress(home.id);
+        const buyer = await escrow.buyer(parseInt(home.id) - 1);
         setBuyer(buyer);
         const hasBought = await escrow.approval(home.id, buyer);
         setHasBought(hasBought);
@@ -54,18 +54,16 @@ export function Home({home, escrow, provider, account, toggleProp}: HomeProps) {
 
     const fetchOwner = async () => {
         if (await escrow.isListed(home.id)) return;
-        const owner = await escrow.buyer(home.id);
+        const owner = await escrow.buyer(parseInt(home.id) - 1);
         setOwner(owner);
     }
 
     const buyHandler = async () => {
-        console.log('🍅')
         const escrowAmount = await escrow.escrowAmount(home.id);
         const signer = await provider.getSigner();
 
         // Buyer deposit earnest
         let transaction = await escrow.connect(signer).depositEarnest(home.id, {value: escrowAmount});
-        console.log('🌸🌸🌸', transaction)
 
         // Buyer approves...
         transaction = await escrow.connect(signer).approveSale(home.id);
