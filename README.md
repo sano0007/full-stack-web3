@@ -1,4 +1,4 @@
-# Web 3.0 Full Stack Real Estate App
+# Web 3.0 Full Stack App
 
 This project is a full stack Web 3.0 application that leverages Solidity, Ethereum, Hardhat, and React to provide a decentralized platform for real estate transactions. It consists of two main parts: the backend (smart contracts) and the frontend application.
 
